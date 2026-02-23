@@ -53,6 +53,7 @@ Before any mission can be marked flight-ready, it must pass Independent Verifica
 
 ## Note: Extract the zip folder and place it as follows
 
+----
 
 commandx/
 │
