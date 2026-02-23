@@ -97,6 +97,9 @@ Phase 4 — Mission Planning: AI trajectory optimization. Input target orbits an
 
 ## Getting Started
 
+
+Note: Download and extract the .zip file 
+
 ### Requirements
 
 - Python 3.9 or higher
@@ -139,6 +142,7 @@ Operationalizing AI: Automates complex orbital planning, allowing leaner teams t
 Risk Intelligence: Quantifies the exact statistical impact of hardware degradation on mission success probability, outputting hard data for insurance underwriting and regulatory compliance.
 
 Scalability: Built on a unified catalog architecture that scales effortlessly from tracking 5 owned assets to monitoring a 500-satellite constellation without underlying code rewrites.
+
 
 ---
 
