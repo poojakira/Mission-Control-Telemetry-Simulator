@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
+import time
 
 # --- MODULE IMPORTS ---
 from data_processor import TLEProcessor
@@ -72,8 +73,6 @@ if page == "1. Command Center":
         m1.metric("Active Assets", len(catalog))
         
         # REALISM: Simulated Ground Station Pass
-        import time
-        # Mock simple pass logic based on time
         if int(time.time()) % 60 < 30:
             m2.metric("Link Status", "AOS (Acquisition of Signal)", delta="Connected")
             st.success("📡 Ground Station: Svalbard (SVAL) | Signal Strength: -85 dBm")
@@ -92,15 +91,18 @@ if page == "1. Command Center":
         for name, sat in items[:500]: 
             try:
                 sat_data.append({"Name": name, "Mean Motion": sat.model.no_kozai, "Inclination": np.degrees(sat.model.inclo)})
-            except: pass
+            except Exception: pass
         
         df = pd.DataFrame(sat_data)
-        fig = px.scatter(df, x="Mean Motion", y="Inclination", color="Inclination", title="Orbit Catalog", color_continuous_scale="Bluered")
-        fig.update_layout(paper_bgcolor="white", plot_bgcolor="white", font=dict(color="#1f2937"))
-        st.plotly_chart(fig, use_container_width=True)
+        if not df.empty:
+            fig = px.scatter(df, x="Mean Motion", y="Inclination", color="Inclination", title="Orbit Catalog", color_continuous_scale="Bluered")
+            fig.update_layout(paper_bgcolor="white", plot_bgcolor="white", font={'color': "#1f2937"})
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No valid telemetry for distribution plot.")
 
 # ==============================================================================
-# PAGE 2: FLIGHT DYNAMICS (Smoothed Control)
+# PAGE 2: FLIGHT DYNAMICS (GNC)
 # ==============================================================================
 elif page == "2. Flight Dynamics (GNC)":
     st.title("🚀 Flight Dynamics & GNC")
@@ -117,32 +119,23 @@ elif page == "2. Flight Dynamics (GNC)":
         progress_bar = st.progress(0)
         status_text = st.empty()
         
-        # Simulation Loop
         steps = 1500
         for i in range(steps):
             history.append(pilot.state.copy())
-            
-            # REALISM: Add Sensor Noise
             input_state = murphy.inject_noise(pilot.state)
+            thrust = pilot.get_control_effort(input_state) * 0.8
             
-            # CONTROL: Smooth the thrust (Simple Gain Dampening)
-            thrust = pilot.get_control_effort(input_state) * 0.8 # Dampen to prevent zigzag
-            
-            # PHYSICS (Real-World High Fidelity)
             pos_eci = pilot.state[:3]
-            gravity_accel = -(MU / (np.linalg.norm(pos_eci)**3)) * pos_eci # Keplerian Gravity
-            j2_accel = OrbitalMechanics.calculate_j2_accel(pos_eci)         # J2 Perturbation
+            gravity_accel = -(MU / (np.linalg.norm(pos_eci)**3)) * pos_eci
+            j2_accel = OrbitalMechanics.calculate_j2_accel(pos_eci)
             
             total_accel = (thrust / pilot.mass) + gravity_accel + j2_accel
-            
             pilot.state[3:] += total_accel * pilot.dt
             pilot.state[:3] += pilot.state[3:] * pilot.dt
             pilot.total_delta_v += (np.linalg.norm(thrust)/pilot.mass)*pilot.dt
             
             dist = np.linalg.norm(pilot.state[:3])
-            
-            # REALISM: Docking Tolerance
-            if dist < 0.02: # 2cm precision
+            if dist < 0.02:
                 status_text.success(f"✅ HARD DOCK CONFIRMED. T={i*0.1:.1f}s")
                 progress_bar.progress(100)
                 break
@@ -158,7 +151,73 @@ elif page == "2. Flight Dynamics (GNC)":
         m2.metric("Final Range", f"{dist*100:.1f} cm")
 
 # ==============================================================================
-# PAGE 5: EMERGENCY OPERATIONS (Anomaly Response)
+# PAGE 3: CERTIFICATION (IV&V)
+# ==============================================================================
+elif page == "3. Certification (IV&V)":
+    st.title("📊 Reliability Engineering")
+    st.markdown("Independent Verification & Validation (IV&V) — Monte Carlo.")
+    
+    if st.button("RUN MONTE CARLO SUITE"):
+        with st.spinner("Running 50 stochastic simulations..."):
+            stats = SystemValidator.run_monte_carlo(50)
+        
+        kpi1, kpi2, kpi3 = st.columns(3)
+        kpi1.metric("Mean Accuracy", f"{stats['mean']:.2f}%")
+        kpi2.metric("3-Sigma Confidence", f"{stats['3_sigma_low']:.2f}%")
+        
+        if stats['3_sigma_low'] >= 98.0:
+            kpi3.metric("Certification", "FLIGHT READY", delta="PASSED")
+            st.success("✅ System meets NASA Class-B Software Safety Requirements.")
+        else:
+            kpi3.metric("Certification", "GROUNDED", delta="FAILED", delta_color="inverse")
+            st.error("❌ System requires GNC tuning.")
+
+        fig = go.Figure(data=[go.Histogram(x=stats['raw_data'], nbinsx=20, marker_color='#0052cc')])
+        fig.update_layout(title="Monte Carlo Distribution", paper_bgcolor="white", plot_bgcolor="white")
+        st.plotly_chart(fig, use_container_width=True)
+
+# ==============================================================================
+# PAGE 4: MISSION PLANNING
+# ==============================================================================
+elif page == "4. Mission Planning":
+    st.title("📐 Mission Trajectory Planner")
+    st.markdown("Evolutionary Algorithm with **Radiation & Drag Constraints**.")
+    
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        st.subheader("Constraints")
+        st.info("⚠️ **Safety Protocols Active:**\n- Radiation Belt Avoidance (1000-6000km)\n- Atmospheric Drag Avoidance (<300km)")
+        if st.button("✨ OPTIMIZE ORBIT"):
+            optimizer = MissionOptimizer(pop_size=40)
+            with st.spinner("Analyzing orbital regimes..."):
+                best_alt, best_cost = optimizer.run()
+                st.session_state['opt_res'] = (best_alt, best_cost)
+    
+    with col2:
+        if 'opt_res' in st.session_state:
+            alt, cost = st.session_state['opt_res']
+            st.success(f"🔹 Global Minimum Found at {alt:.2f} km")
+            
+            if 300 < alt < 1000:
+                st.caption("✅ Orbit is Safe (LEO). Low Drag, No Radiation.")
+            elif alt > 6000:
+                st.caption("✅ Orbit is Safe (MEO/GEO). Above Radiation Belts.")
+            else:
+                st.caption("⚠️ Orbit is in a High Risk Zone.")
+            
+            m1, m2 = st.columns(2)
+            m1.metric("Optimal Altitude", f"{alt:.2f} km")
+            m2.metric("Total Mission Cost", f"{cost:.2f}")
+            
+            x = np.linspace(160, 8000, 100)
+            y = [OrbitalMechanics.hohmann_transfer(h+6378, 35786+6378) + (2.0 if h<300 else 0) + (5.0 if 1000<h<6000 else 0) for h in x]
+            fig = px.line(x=x, y=y, title="Cost Landscape (Showing Radiation Penalty Spike)")
+            fig.add_scatter(x=[alt], y=[cost], mode='markers', marker={'size': 12, 'color': 'red'}, name='Selected')
+            fig.update_layout(xaxis_title="Altitude (km)", yaxis_title="Cost (Fuel + Risk)", paper_bgcolor="white", plot_bgcolor="white")
+            st.plotly_chart(fig, use_container_width=True)
+
+# ==============================================================================
+# PAGE 5: EMERGENCY OPERATIONS
 # ==============================================================================
 elif page == "5. Emergency Operations":
     st.title("🚨 Emergency Operations")
@@ -168,7 +227,6 @@ elif page == "5. Emergency Operations":
         st.session_state['scenario'] = AnomalyScenario()
     
     scenario = st.session_state['scenario']
-    
     col_ctrl, col_telemetry = st.columns([1, 2])
     
     with col_ctrl:
@@ -196,8 +254,6 @@ elif page == "5. Emergency Operations":
         if scenario.is_active or scenario.resolved or scenario.failed:
             scenario.update()
             status = scenario.get_status()
-            
-            # Dynamic Colors
             temp_color = "normal" if status['temp'] < 60 else "inverse"
             
             m1, m2, m3 = st.columns(3)
@@ -210,7 +266,6 @@ elif page == "5. Emergency Operations":
             elif status['resolved']:
                 st.success("✅ MISSION SAVED: Operator response neutralized thermal runaway.")
             
-            # Real-time Telemetry Graph
             if 'temp_history' not in st.session_state:
                 st.session_state['temp_history'] = []
             
@@ -228,53 +283,3 @@ elif page == "5. Emergency Operations":
                 st.rerun()
         else:
             st.info("Standing by for anomaly injection. Monitor subsystem integrity.")
-
-# ==============================================================================
-# PAGE 4: MISSION PLANNING (Physics-Aware)
-# ==============================================================================
-elif page == "4. Mission Planning":
-    st.title("📐 Mission Trajectory Planner")
-    st.markdown("Evolutionary Algorithm with **Radiation & Drag Constraints**.")
-    
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        st.subheader("Constraints")
-        st.info("⚠️ **Safety Protocols Active:**\n- Radiation Belt Avoidance (1000-6000km)\n- Atmospheric Drag Avoidance (<300km)")
-        if st.button("✨ OPTIMIZE ORBIT"):
-            optimizer = MissionOptimizer(pop_size=40)
-            with st.spinner("Analyzing orbital regimes..."):
-                # FIXED: Unpacking 2 values now works because we fixed ga_optimizer.py
-                best_alt, best_cost = optimizer.run()
-                st.session_state['opt_res'] = (best_alt, best_cost)
-    
-    with col2:
-        if 'opt_res' in st.session_state:
-            alt, cost = st.session_state['opt_res']
-            
-            # REALISM: Interpret the result
-            st.success(f"🔹 Global Minimum Found at {alt:.2f} km")
-            
-            if 300 < alt < 1000:
-                st.caption("✅ Orbit is Safe (LEO). Low Drag, No Radiation.")
-            elif alt > 6000:
-                st.caption("✅ Orbit is Safe (MEO/GEO). Above Radiation Belts.")
-            else:
-                st.caption("⚠️ Orbit is in a High Risk Zone.")
-            
-            m1, m2 = st.columns(2)
-            m1.metric("Optimal Altitude", f"{alt:.2f} km")
-            m2.metric("Total Mission Cost", f"{cost:.2f}")
-            
-            # Visualizing the "Death Zone"
-            x = np.linspace(160, 8000, 100)
-            y = []
-            for h in x:
-                c = OrbitalMechanics.hohmann_transfer(h+6378, 35786+6378)
-                if h < 300: c += 2.0
-                if 1000 < h < 6000: c += 5.0
-                y.append(c)
-                
-            fig = px.line(x=x, y=y, title="Cost Landscape (Showing Radiation Penalty Spike)")
-            fig.add_scatter(x=[alt], y=[cost], mode='markers', marker=dict(size=12, color='red'), name='Selected')
-            fig.update_layout(xaxis_title="Altitude (km)", yaxis_title="Cost (Fuel + Risk)", paper_bgcolor="white", plot_bgcolor="white")
-            st.plotly_chart(fig, use_container_width=True)
