@@ -39,21 +39,35 @@ While the current prototype utilizes CPU-based Scikit-Learn logic, this architec
 
 ---
 
-## 🏗️ Project Structure
+## 🏗️ Engineering Focus Areas
 
-```text
-CommandX/
-├── app_dashboard.py      # Streamlit UI & Mission Control Center
-├── mission_engine.py      # Orbital Physics (J2, Hohmann, Keplerian)
-├── ga_optimizer.py       # Trajectory Planning via Genetic Algorithms
-├── gnc_kalman.py         # Guidance & Navigation (Extended Kalman Filter)
-├── rl_pilot.py           # Actuator Control & PID Logic
-├── system_analytics.py   # Monte Carlo IV&V Simulation Suite
-├── data_processor.py      # TLE Parsing & Catalog Management
-├── graphics_engine.py    # 3D Plotly Tactical Visuals
-├── model_3d.py           # Spacecraft Geometry Models
-└── requirements.txt      # Project Dependencies
-```
+CommandX is built at the intersection of orbital mechanics and machine learning. Below is a breakdown of the repository based on engineering specialization.
+
+### 🤖 Robotics & GNC Engineer Focus
+Core orbital physics, navigation, and hardware abstraction layers.
+- **[mission_engine.py](file:///home/rhutvik/CommandX/mission_engine.py)**: High-fidelity orbital physics (J2 perturbations, Hohmann transfers, Keplerian dynamics).
+- **[gnc_kalman.py](file:///home/rhutvik/CommandX/gnc_kalman.py)**: Guidance, Navigation, and Control via Extended Kalman Filters (EKF).
+- **[rl_pilot.py](file:///home/rhutvik/CommandX/rl_pilot.py)**: Low-level actuator control and PID logic for precision docking.
+- **[graphics_engine.py](file:///home/rhutvik/CommandX/graphics_engine.py)**: 3D tactical visualizations using Plotly.
+- **[model_3d.py](file:///home/rhutvik/CommandX/model_3d.py)**: CAD-derived spacecraft geometry and mass property models.
+- **[subsystem_manager.py](file:///home/rhutvik/CommandX/subsystem_manager.py)**: Hardware abstraction layer for satellite bus telemetry.
+- **[emergency_ops.py](file:///home/rhutvik/CommandX/emergency_ops.py)**: Safety-critical fail-safes and automated decommissioning protocols.
+
+### 🧠 ML & Data Engineer Focus
+Intelligence, optimization, and high-scale data processing pipelines.
+- **[ga_optimizer.py](file:///home/rhutvik/CommandX/ga_optimizer.py)**: Multi-objective trajectory optimization via Genetic Algorithms.
+- **[streaming_ml_engine.py](file:///home/rhutvik/CommandX/streaming_ml_engine.py)**: Asynchronous telemetry buffering and real-time ML inference backend.
+- **[system_analytics.py](file:///home/rhutvik/CommandX/system_analytics.py)**: Monte Carlo IV&V suite for statistical flight readiness verification.
+- **[data_processor.py](file:///home/rhutvik/CommandX/data_processor.py)**: TLE parsing, space-object catalog management, and data cleaning.
+- **[run_anomaly_test.py](file:///home/rhutvik/CommandX/run_anomaly_test.py)**: Deployment-ready cyber anomaly detection using isolation forests.
+- **[entropy_engine.py](file:///home/rhutvik/CommandX/entropy_engine.py)**: Statistical analysis of state-space uncertainty and information gain.
+
+### 🌐 Shared Infrastructure
+Common utilities and project entry points.
+- **[app_dashboard.py](file:///home/rhutvik/CommandX/app_dashboard.py)**: The main Streamlit mission control dashboard.
+- **[requirements.txt](file:///home/rhutvik/CommandX/requirements.txt)**: Python dependency manifest.
+- **[Dockerfile](file:///home/rhutvik/CommandX/Dockerfile)**: Containerization configuration for cloud deployment.
+- **[k8s/](file:///home/rhutvik/CommandX/k8s/)**: Kubernetes manifests for orchestration.
 
 ---
 
