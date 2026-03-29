@@ -6,3 +6,4 @@ deap
 streamlit
 plotly
 watchdog
+scikit-learn
