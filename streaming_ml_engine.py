@@ -185,6 +185,7 @@ class PipelineOrchestrator:
         is_attack = random.random() < 0.02
         return {
             'timestamp': time.time(),
+            'generated_at': time.time(), # High-precision creation mark
             'cpu_load': random.uniform(90, 100) if is_attack else np.random.normal(45, 10),
             'memory_usage': max(0.0, min(100.0, np.random.normal(60, 5))),
             'bus_temp': np.random.normal(25, 2),

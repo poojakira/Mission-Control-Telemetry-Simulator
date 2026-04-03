@@ -17,6 +17,7 @@ from graphics_engine import TacticalDisplay
 from model_3d import SatelliteModel  # 3D Visuals
 from emergency_ops import AnomalyScenario
 from streaming_ml_engine import PipelineOrchestrator
+from gnc_kalman import ExtendedKalmanFilter
 
 # --- PAGE CONFIGURATION ---
 st.set_page_config(
@@ -120,17 +121,45 @@ elif page == "2. Flight Dynamics (GNC)":
     if st.session_state.get('run_sim', False):
         pilot = AdvancedRLPilot()
         murphy = EntropyEngine()
+        
+        # --- EKF INITIALIZATION ---
+        ekf = ExtendedKalmanFilter(initial_state=pilot.state.copy(), dt=pilot.dt)
+        
         history = []
+        ekf_history = []
+        rmse_pos_list = []
+        rmse_vel_list = []
         
         progress_bar = st.progress(0)
         status_text = st.empty()
         
         steps = 1500
+        sim_start_time = time.perf_counter()
+        
         for i in range(steps):
-            history.append(pilot.state.copy())
-            input_state = murphy.inject_noise(pilot.state)
-            thrust = pilot.get_control_effort(input_state) * 0.8
+            # 1. Capture Ground Truth
+            true_state = pilot.state.copy()
+            history.append(true_state)
             
+            # 2. Generate Noisy Measurement (using EntropyEngine)
+            measurement = murphy.inject_noise(true_state)
+            
+            # 3. EKF Predict & Update
+            # In this simulator, thrust is the command
+            input_state_for_pilot = ekf.state.copy() # Use estimate for control
+            thrust = pilot.get_control_effort(input_state_for_pilot) * 0.8
+            
+            ekf.predict(accel_command=thrust/pilot.mass)
+            ekf.update(measurement)
+            ekf_history.append(ekf.state.copy())
+            
+            # 4. Calculate Instantaneous Error for RMSE tracking
+            pos_error = np.linalg.norm(ekf.state[:3] - true_state[:3])
+            vel_error = np.linalg.norm(ekf.state[3:] - true_state[3:])
+            rmse_pos_list.append(pos_error**2)
+            rmse_vel_list.append(vel_error**2)
+            
+            # 5. Physics Integration (Ground Truth)
             pos_eci = pilot.state[:3]
             gravity_accel = -(MU / (np.linalg.norm(pos_eci)**3)) * pos_eci
             j2_accel = OrbitalMechanics.calculate_j2_accel(pos_eci)
@@ -144,17 +173,44 @@ elif page == "2. Flight Dynamics (GNC)":
             if dist < 0.02:
                 status_text.success(f"✅ HARD DOCK CONFIRMED. T={i*0.1:.1f}s")
                 progress_bar.progress(100)
+                actual_steps = i + 1
                 break
             
             if i % 100 == 0:
                 progress_bar.progress(int((i/steps)*100))
+        else:
+            actual_steps = steps
+
+        sim_end_time = time.perf_counter()
+        sim_duration = sim_end_time - sim_start_time
+        sps = actual_steps / sim_duration
         
+        # 6. Final RMSE Calculation
+        final_rmse_pos = np.sqrt(np.mean(rmse_pos_list))
+        final_rmse_vel = np.sqrt(np.mean(rmse_vel_list))
+        
+        # --- VISUALIZATION ---
         fig_3d = TacticalDisplay.create_3d_plot(history)
         st.plotly_chart(fig_3d, use_container_width=True)
         
-        m1, m2 = st.columns(2)
-        m1.metric("Delta-V Used", f"{pilot.total_delta_v:.2f} m/s")
-        m2.metric("Final Range", f"{dist*100:.1f} cm")
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Delta-V Used", f"{pilot.total_delta_v:.2f} m/s")
+        c2.metric("Final Range", f"{dist*100:.1f} cm")
+        c3.metric("Pos RMSE", f"{final_rmse_pos*1000:.2f} m")
+        c4.metric("Vel RMSE", f"{final_rmse_vel*1000:.2f} m/s")
+        
+        st.metric("Simulation Performance", f"{sps:.0f} steps/sec", delta=f"{pilot.dt*1000:.1f}ms step-time")
+        
+        # Error convergence plot
+        err_df = pd.DataFrame({
+            'Step': np.arange(len(rmse_pos_list)),
+            'Pos Error (km)': np.sqrt(rmse_pos_list),
+            'Vel Error (km/s)': np.sqrt(rmse_vel_list)
+        })
+        fig_err = px.line(err_df, x='Step', y=['Pos Error (km)', 'Vel Error (km/s)'], title="EKF Error Convergence")
+        fig_err.update_layout(paper_bgcolor="white", plot_bgcolor="white")
+        st.plotly_chart(fig_err, use_container_width=True)
+
 
 # ==============================================================================
 # PAGE 3: CERTIFICATION (IV&V)
@@ -299,26 +355,33 @@ elif page == "6. ML Pipeline & Security":
     
     # 1. Top Metrics Banner
     st.markdown("### 📊 Enterprise System Metrics")
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Batch Inference Latency", f"{metrics['latency_ms']:.2f} ms")
-    m2.metric("Inference Throughput", f"{metrics['throughput_hz']:.1f} hz")
-    m3.metric("Ingestion Queue Depth", f"{metrics['queue_size']}")
-    m4.metric("Output Buffer Load", f"{metrics['buffer_usage']:.1f}%")
+    
+    data_buffer = streamer.get_latest_data()
+    df = pd.DataFrame(data_buffer) if data_buffer else pd.DataFrame()
+    
+    if not df.empty:
+        avg_ui_latency = (time.time() - df['generated_at'].iloc[-10:].mean()) * 1000.0
+    else:
+        avg_ui_latency = 0.0
+
+    m1, m2, m3, m4, m5 = st.columns(5)
+    m1.metric("Batch Latency", f"{metrics['latency_ms']:.1f}ms")
+    m2.metric("Throughput", f"{metrics['throughput_hz']:.1f}hz")
+    m3.metric("Queue Depth", f"{metrics['queue_size']}")
+    m4.metric("UI Latency", f"{avg_ui_latency:.1f}ms", delta="Real-time", delta_color="inverse")
+    m5.metric("Buffer Load", f"{metrics['buffer_usage']:.1f}%")
     
     st.divider()
 
     # 2. Main Live Dashboards
     col_pipeline, col_security = st.columns([1, 1])
     
-    data_buffer = streamer.get_latest_data()
-    
-    if len(data_buffer) < 20: # Wait for buffer to fill
+    if len(df) < 20: # Wait for buffer to fill
         st.info("Gathering telemetry for ML inference... Please hold.")
         time.sleep(1.0)
         st.rerun()
     else:
-        df = pd.DataFrame(data_buffer)
-        
+        # df is already created above
         with col_pipeline:
             st.markdown("### 🤖 CPU Prediction Model")
             st.caption("Trailing 5s Ridge Regression Forecast")
