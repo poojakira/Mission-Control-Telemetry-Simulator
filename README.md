@@ -7,12 +7,29 @@ CommandX is a professional-grade mission-control stack for satellite constellati
 
 ---
 
-## 📈 **Engineering Impact & Performance Metrics**
+## 🎬 **Full Mission Walkthrough (v7.0 Master Demo)**
 
+![Master Walkthrough Demo](file:///C:/Users/pooja/.gemini/antigravity/brain/10ca3ab7-2406-45dd-878a-67006f9f26ab/commandx_full_master_demo_v7_0_1775339754468.webp)
+
+---
+
+## 📈 **Engineering Impact & Performance Metrics**
 *   **60.0% Fuel & Risk Optimization**: Genetic Algorithm (GA) autonomously routes trajectories to bypass high-density orbital debris shells.
 *   **99.9% Verification Time Compression**: High-throughput Monte Carlo IV&V suite executes 1,000+ stochastic simulations in under 7 minutes.
 *   **3-Sigma Reliability (99.28%)**: Validated GNC robustness by simulating extreme hardware degradation (IMU drift, radiation-induced bit-flips).
 *   **<20ms Inference Latency**: Real-time streaming anomaly detection using batched Isolation Forest on high-frequency (50Hz) telemetry.
+
+---
+
+## 🖼️ **Tactical UI Gallery**
+
+````carousel
+![1. Command Center](file:///C:/Users/pooja/.gemini/antigravity/brain/10ca3ab7-2406-45dd-878a-67006f9f26ab/command_center_high_contrast_metrics_1775338853782.png)
+<!-- slide -->
+![6. ML Pipeline & Security](file:///C:/Users/pooja/.gemini/antigravity/brain/10ca3ab7-2406-45dd-878a-67006f9f26ab/ml_pipeline_system_metrics_verification_1775338866569.png)
+````
+
+---
 
 ---
 
