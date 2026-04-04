@@ -1,32 +1,37 @@
-# 🛰️ CommandX — Orbital Mission Control System
-### Flight-Ready Platform for Satellite Ops & Real Orbital Physics — v7.0
+# 🛰️ CommandX: Mission-Critical Orbital Control & ML Observability
 
-> A high-fidelity satellite mission control system built on real orbital physics (J2 perturbations), autonomous GNC (EKF-driven), and AI-driven trajectory optimization. CommandX brings together the tools mission operators need — from live fleet monitoring to emergency anomaly response — inside a single, tactical command interface.
+[![Flight Ready](https://img.shields.io/badge/Status-Flight_Ready-success?style=for-the-badge&logo=spacex)](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/docs/TECHNICAL_DEEP_DIVE.md)
+[![ML Ops](https://img.shields.io/badge/Engine-Streaming_ML_v2-blue?style=for-the-badge)](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/ml/models.py)
 
-[![CI](https://github.com/poojakira/CommandX/actions/workflows/ci.yml/badge.svg)](https://github.com/poojakira/CommandX/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-v7.0-blue.svg?style=flat-square)](https://github.com/poojakira/CommandX)
-[![License](https://img.shields.io/badge/license-MIT-lightgrey.svg?style=flat-square)](LICENSE)
+CommandX is a professional-grade mission-control stack for satellite constellation management. It bridges the gap between high-precision orbital physics and industrial-grade observability, featuring a **Tactical Dark Mode** design system and a **Streaming ML Inference Engine**.
 
 ---
 
-## 🌍 Overview
+## 📈 **Engineering Impact & Performance Metrics**
 
-CommandX is a mission-control stack designed for satellite constellation management. It bridges the gap between high-precision orbital physics and industrial-grade observability, now featuring a **Tactical Dark Mode** design system for reduced eye-strain during 24/7 flight operations.
+*   **60.0% Fuel & Risk Optimization**: Genetic Algorithm (GA) autonomously routes trajectories to bypass high-density orbital debris shells.
+*   **99.9% Verification Time Compression**: High-throughput Monte Carlo IV&V suite executes 1,000+ stochastic simulations in under 7 minutes.
+*   **3-Sigma Reliability (99.28%)**: Validated GNC robustness by simulating extreme hardware degradation (IMU drift, radiation-induced bit-flips).
+*   **<20ms Inference Latency**: Real-time streaming anomaly detection using batched Isolation Forest on high-frequency (50Hz) telemetry.
 
-The system integrates live **Space-Track TLE data** with an **Extended Kalman Filter (EKF)** for state awareness, a **Genetic Algorithm (GA)** for fuel-optimal trajectory planning, and a **Streaming ML Engine** for real-time anomaly detection across distributed telemetry channels.
+---
 
-### 🚀 Proven Performance Metrics
+## 🏗️ **Core Engineering Stack**
+- **GNC Engine**: Extended Kalman Filter (EKF) for state estimation + J2 Perturbation physics.
+- **MLOps Platform**: Decoupled ingestion/inference pipeline with strongly-typed `TelemetryPacket` data models.
+- **Mission Control**: Streamlit-based tactical interface with real-time Plotly visualizations and emergency response simulation.
 
-* **60.0% Fuel & Risk Optimization**: Engineered a Genetic Algorithm that autonomously routes trajectories to bypass high-density orbital shells.
-* **99.9% Verification Time Compression**: Architected a high-throughput Monte Carlo IV&V suite that executes 1,000+ simulations in under 7 minutes.
-* **3-Sigma Reliability (99.28%)**: Mathematically validated GNC robustness by simulating extreme hardware degradation (IMU drift, radiation-induced bit-flips).
-* **Tactical Dark Mode UI**: Professional-grade, high-contrast design system built with CSS-based glassmorphism for enhanced data readability.
+---
+
+## 📖 **Technical Documentation**
+- **[System Architecture & ML Deep-Dive](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/docs/TECHNICAL_DEEP_DIVE.md)**: Mathematical logic, data schemas, and pipeline design.
+- **[Telemetry Data Model Snapshot](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/docs/samples/telemetry_snapshot.json)**: Sample high-frequency telemetry payload.
+- **[Production Deployment (K8s/Docker)](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/docker-compose.yml)**: Orchestration for distributed mission environments.
 
 ---
 
 ## 🏗️ Architecture
 
-CommandX utilizes a decoupled, thread-safe architecture to ensure high-frequency telemetry ingestion does not block mission-critical inference.
 
 ```mermaid
 graph TD

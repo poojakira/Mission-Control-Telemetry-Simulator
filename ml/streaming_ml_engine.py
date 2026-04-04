@@ -4,12 +4,14 @@ import threading
 import logging
 import queue
 from collections import deque
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Sequence
 
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
 from sklearn.linear_model import Ridge
+
+from ml.models import TelemetryPacket
 
 # ==============================================================================
 # LOGGING CONFIGURATION (Enterprise Standard)
@@ -54,7 +56,7 @@ class BatchInferenceEngine:
 
         logger.info(f"Initialized BatchInferenceEngine (Max Batch: {self.batch_size}, Latency SLA: {max_latency_ms}ms)")
 
-    def _extract_features(self, payload: Dict[str, Any]) -> List[float]:
+    def _extract_features(self, payload: TelemetryPacket) -> List[float]:
         """Extracts numerical features required for inference."""
         return [
             payload.get('cpu_load', 0.0),
@@ -63,15 +65,15 @@ class BatchInferenceEngine:
             payload.get('network_tx', 0.0)
         ]
 
-    def process_batch(self, batch: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def process_batch(self, batch: List[TelemetryPacket]) -> List[TelemetryPacket]:
         """
         Executes vectorized inference on a batch of telemetry payloads.
         
         Args:
-            batch: A list of raw telemetry dictionaries.
+            batch: A list of raw TelemetryPacket dictionaries.
             
         Returns:
-            The list of dictionaries enriched with ML predictions.
+            The list of packets enriched with ML predictions.
         """
         if not batch:
             return []
@@ -121,7 +123,7 @@ class BatchInferenceEngine:
 
         # 4. Enrich & Return
         for i, item in enumerate(batch):
-            item['ml_is_anomaly'] = (anomalies[i] == -1)
+            item['ml_is_anomaly'] = bool(anomalies[i] == -1)
             item['ml_anomaly_score'] = float(scores[i])
             item['ml_predicted_cpu_t5'] = float(predicted_cpus[i])
             
@@ -142,8 +144,8 @@ class PipelineOrchestrator:
         self.buffer_size = frequency_hz * buffer_duration_sec
         
         # Thread-safe queues and buffers
-        self.ingestion_queue: queue.Queue = queue.Queue(maxsize=1000)
-        self.output_buffer: deque = deque(maxlen=self.buffer_size)
+        self.ingestion_queue: queue.Queue[TelemetryPacket] = queue.Queue(maxsize=1000)
+        self.output_buffer: deque[TelemetryPacket] = deque(maxlen=self.buffer_size)
         
         self.engine = BatchInferenceEngine(batch_size=16, max_latency_ms=20.0)
         
@@ -180,7 +182,7 @@ class PipelineOrchestrator:
             self._inference_thread.join(timeout=2.0)
         logger.info("Pipeline Orchestrator shutting down.")
 
-    def _generate_synthetic_payload(self) -> Dict[str, Any]:
+    def _generate_synthetic_payload(self) -> TelemetryPacket:
         """Generates realistic aerospace telemetry noise."""
         is_attack = random.random() < 0.02
         return {
@@ -190,7 +192,10 @@ class PipelineOrchestrator:
             'memory_usage': max(0.0, min(100.0, np.random.normal(60, 5))),
             'bus_temp': np.random.normal(25, 2),
             'network_tx': random.uniform(8000, 15000) if is_attack else max(0.0, np.random.normal(500, 100)),
-            'ground_truth_attack': is_attack
+            'ground_truth_attack': is_attack,
+            'ml_is_anomaly': None,
+            'ml_anomaly_score': None,
+            'ml_predicted_cpu_t5': None
         }
 
     def _ingestion_loop(self) -> None:
@@ -212,7 +217,7 @@ class PipelineOrchestrator:
     def _inference_loop(self) -> None:
         """Dynamic batching consumer loop."""
         while self._running:
-            batch = []
+            batch: List[TelemetryPacket] = []
             batch_start = time.time()
             
             # Drain queue until batch size is met or max latency is hit
@@ -243,7 +248,7 @@ class PipelineOrchestrator:
                 # Prevent CPU spinning if idle
                 time.sleep(0.01)
 
-    def get_latest_data(self) -> List[Dict[str, Any]]:
+    def get_latest_data(self) -> List[TelemetryPacket]:
         """Returns a stable snapshot of the circular buffer."""
         return list(self.output_buffer)
 
