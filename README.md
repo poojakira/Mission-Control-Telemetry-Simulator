@@ -1,7 +1,7 @@
 # 🛰️ CommandX: Mission-Critical Orbital Control & ML Observability
 
-[![Flight Ready](https://img.shields.io/badge/Status-Flight_Ready-success?style=for-the-badge&logo=spacex)](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/docs/TECHNICAL_DEEP_DIVE.md)
-[![ML Ops](https://img.shields.io/badge/Engine-Streaming_ML_v2-blue?style=for-the-badge)](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/ml/models.py)
+[![Flight Ready](https://img.shields.io/badge/Status-Flight_Ready-success?style=for-the-badge&logo=spacex)](docs/TECHNICAL_DEEP_DIVE.md)
+[![ML Ops](https://img.shields.io/badge/Engine-Streaming_ML_v2-blue?style=for-the-badge)](commandx/ml/models.py)
 
 CommandX is a professional-grade mission-control stack for satellite constellation management. It bridges the gap between high-precision orbital physics and industrial-grade observability, featuring a **Tactical Dark Mode** design system and a **Streaming ML Inference Engine**.
 
@@ -43,9 +43,9 @@ All telemetry is simulated; this is a portfolio prototype, not connected to real
 ---
 
 ## 📖 **Technical Documentation**
-- **[System Architecture & ML Deep-Dive](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/docs/TECHNICAL_DEEP_DIVE.md)**: Mathematical logic, data schemas, and pipeline design.
-- **[Telemetry Data Model Snapshot](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/docs/samples/telemetry_snapshot.json)**: Sample high-frequency telemetry payload.
-- **[Production Deployment (K8s/Docker)](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/docker-compose.yml)**: Orchestration for distributed mission environments.
+- **[System Architecture & ML Deep-Dive](docs/TECHNICAL_DEEP_DIVE.md)**: Mathematical logic, data schemas, and pipeline design.
+- **[Telemetry Data Model Snapshot](docs/samples/telemetry_snapshot.json)**: Sample high-frequency telemetry payload.
+- **[Production Deployment (K8s/Docker)](docker-compose.yml)**: Orchestration for distributed mission environments.
 
 ---
 
@@ -87,9 +87,8 @@ graph TD
 
 For a deep-dive into the mathematical models, GNC logic, and streaming ML architecture, see the following:
 
-- **[Technical Architecture Deep-Dive](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/docs/TECHNICAL_DEEP_DIVE.md)**: Detailed breakdown of the EKF, Isolation Forest, and Ridge Regression implementations.
-- **[Data Model & Schema](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/docs/samples/telemetry_snapshot.json)**: JSON schema and example payload for satellite telemetry.
-- **[Walkthrough of Professionalization](file:///c:/Users/pooja/.gemini/antigravity/brain/10ca3ab7-2406-45dd-878a-67006f9f26ab/walkthrough.md)**: Summary of the recent engineering upgrades.
+- **[Technical Architecture Deep-Dive](docs/TECHNICAL_DEEP_DIVE.md)**: Detailed breakdown of the EKF, Isolation Forest, and Ridge Regression implementations.
+- **[Data Model & Schema](docs/samples/telemetry_snapshot.json)**: JSON schema and example payload for satellite telemetry.
 
 ---
 
