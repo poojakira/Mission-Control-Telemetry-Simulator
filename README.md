@@ -5,8 +5,7 @@
 
 CommandX is a professional-grade mission-control stack for satellite constellation management. It bridges the gap between high-precision orbital physics and industrial-grade observability, featuring a **Tactical Dark Mode** design system and a **Streaming ML Inference Engine**.
 
-> [!NOTE]
-> **Project Scope**: All telemetry is simulated; this is a portfolio prototype, not connected to real satellites.
+All telemetry is simulated; this is a portfolio prototype, not connected to real satellites.
 
 ---
 
@@ -94,12 +93,12 @@ For a deep-dive into the mathematical models, GNC logic, and streaming ML archit
 
 ---
 
-## 🔍 Deep Dive
+## Deep dive
 
 | Component | Technical Highlights |
 | :--- | :--- |
-| **[commandx/gnc/ekf.py](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/commandx/gnc/ekf.py)** | **State Estimation**: Maps 6D state vectors `[x, y, z, vx, vy, vz]` in ECI frame. <br> **Noise Modeling**: Process noise (`Q`) tuned for J2 perturbations; Measurement noise (`R`) models IMU/GPS drift. <br> **Stability**: Jacobian-based linearization of non-linear Keplerian dynamics. |
-| **[commandx/anomaly/score.py](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/commandx/anomaly/score.py)** | **Scoring Logic**: High-throughput (50Hz) Isolation Forest inference on telemetry features (CPU, Net, Temp). <br> **Thresholding**: contamination=0.05 threshold for outlier detection. <br> **Ranking**: Decision function outputs allow for severity ranking of detected anomalies. |
+| **[commandx/gnc/ekf.py](commandx/gnc/ekf.py)** | **State Estimation**: Maps 6D state vectors `[x, y, z, vx, vy, vz]` in ECI frame. <br> **Noise Modeling**: Process noise (`Q`) tuned for J2 perturbations; Measurement noise (`R`) models IMU/GPS drift. <br> **Stability**: Jacobian-based linearization of non-linear Keplerian dynamics for improved numerical stability during high-eccentricity phases. |
+| **[commandx/anomaly/score.py](commandx/anomaly/score.py)** | **Scoring Logic**: High-throughput (50Hz) Isolation Forest inference on telemetry features (CPU, Net, Temp). <br> **Thresholding**: `contamination=0.05` fixed threshold for outlier detection, balancing precision and recall. <br> **Ranking**: Decision function outputs allow for severity ranking of detected anomalies, prioritizing mission-critical threats. |
 
 ---
 
