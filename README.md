@@ -12,7 +12,7 @@ CommandX is a professional-grade mission-control stack for satellite constellati
 
 ## 🎬 **Full Mission Walkthrough (v7.0 Master Demo)**
 
-![Master Walkthrough Demo](file:///C:/Users/pooja/.gemini/antigravity/brain/10ca3ab7-2406-45dd-878a-67006f9f26ab/commandx_full_master_demo_v7_0_1775339754468.webp)
+![Master Walkthrough Demo](./assets/dashboard_command_center.png)
 
 ---
 
@@ -20,16 +20,16 @@ CommandX is a professional-grade mission-control stack for satellite constellati
 *   **60.0% Fuel & Risk Optimization**: Genetic Algorithm (GA) autonomously routes trajectories to bypass high-density orbital debris shells.
 *   **99.9% Verification Time Compression**: High-throughput Monte Carlo IV&V suite executes 1,000+ stochastic simulations in under 7 minutes.
 *   **3-Sigma Reliability (99.28%)**: Validated GNC robustness by simulating extreme hardware degradation (IMU drift, radiation-induced bit-flips).
-*   **<20ms Inference Latency**: Real-time streaming anomaly detection using batched Isolation Forest on high-frequency (50Hz) telemetry.
+*   **<35ms Inference Latency**: Real-time streaming anomaly detection using batched Isolation Forest on high-frequency (50Hz) telemetry.
 
 ---
 
 ## 🖼️ **Tactical UI Gallery**
 
 ````carousel
-![1. Command Center](file:///C:/Users/pooja/.gemini/antigravity/brain/10ca3ab7-2406-45dd-878a-67006f9f26ab/command_center_high_contrast_metrics_1775338853782.png)
+![1. Command Center](./assets/dashboard_command_center.png)
 <!-- slide -->
-![6. ML Pipeline & Security](file:///C:/Users/pooja/.gemini/antigravity/brain/10ca3ab7-2406-45dd-878a-67006f9f26ab/ml_pipeline_system_metrics_verification_1775338866569.png)
+![6. ML Pipeline & Security](./assets/dashboard_ml_security.png)
 ````
 
 ---
@@ -107,10 +107,10 @@ For a deep-dive into the mathematical models, GNC logic, and streaming ML archit
 
 For a live demonstration of the mission control interface, see the visual proof below:
 
-![Dashboard Command Center](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/assets/dashboard_command_center_v7.png)
+![Dashboard Command Center](./assets/dashboard_command_center.png)
 *Figure 1: Global Mission Command Center with Asset Telemetry.*
 
-![Dashboard ML Security](file:///c:/Users/pooja/Downloads/CommandX-main%20%287%29/CommandX-main/assets/dashboard_ml_security_v7.png)
+![Dashboard ML Security](./assets/dashboard_ml_security.png)
 *Figure 2: Real-time ML Pipeline & Cyber-Threat Detection.*
 
 ---
