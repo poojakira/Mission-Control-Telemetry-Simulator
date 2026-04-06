@@ -9,8 +9,10 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # 4. System Deps
+# curl is REQUIRED for the HEALTHCHECK command below
 RUN apt-get update && apt-get install -y \
     build-essential \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # 5. Python Deps
