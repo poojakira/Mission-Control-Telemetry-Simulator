@@ -20,14 +20,12 @@ class ExtendedKalmanFilter:
         self.P = np.eye(self.n) * 1.0
         # Process noise
         self.Q = np.eye(self.n) * 0.0001
-        # Measurement matrix (measure position only, first 3 states)
-        self.H = np.zeros((3, self.n))
-        self.H[:3, :3] = np.eye(3)
-        # Measurement noise
-        self.R = np.eye(3) * 0.5
+        # Measurement noise (default: full state measurement)
+        self.R_pos = np.eye(3) * 0.5
+        self.R_full = np.eye(self.n) * 0.5
 
     def _f(self, state):
-        """State transition: simple linear ballistic propagation."""
+        """State transition: gravitational propagation."""
         x, y, z, vx, vy, vz = state
         r = np.sqrt(x**2 + y**2 + z**2)
         if r < 1e-6:
@@ -45,7 +43,7 @@ class ExtendedKalmanFilter:
             vz + az * dt,
         ])
 
-    def _get_jacobian_f(self, state):
+    def _get_jacobian_f(self):
         """Linearized state transition matrix F."""
         dt = self.dt
         F = np.eye(self.n)
@@ -54,15 +52,21 @@ class ExtendedKalmanFilter:
 
     def predict(self):
         """EKF prediction step."""
-        F = self._get_jacobian_f(self.state)
+        F = self._get_jacobian_f()
         self.state = self._f(self.state)
         self.P = F @ self.P @ F.T + self.Q
 
     def update(self, z):
-        """EKF update step with measurement z (position, shape (3,))."""
-        z = np.asarray(z)
-        y = z - self.H @ self.state
-        S = self.H @ self.P @ self.H.T + self.R
-        K = self.P @ self.H.T @ np.linalg.inv(S)
+        """EKF update step. z can be 3D (position) or full state (6D)."""
+        z = np.asarray(z, dtype=float)
+        m = len(z)  # measurement dimension
+
+        # Build H and R dynamically based on measurement size
+        H = np.eye(m, self.n)  # observes first m components
+        R = np.eye(m) * 0.5
+
+        y = z - H @ self.state
+        S = H @ self.P @ H.T + R
+        K = self.P @ H.T @ np.linalg.inv(S)
         self.state = self.state + K @ y
-        self.P = (np.eye(self.n) - K @ self.H) @ self.P
+        self.P = (np.eye(self.n) - K @ H) @ self.P
