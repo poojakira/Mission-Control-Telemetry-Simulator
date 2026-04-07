@@ -207,6 +207,6 @@ MIT License — see [LICENSE](LICENSE).
 
 ## Author
 
-Built by [@poojakira](https://github.com/poojakira) — Robotics & Automation Engineering, Arizona State University.
+Built by [Pooja Kiran](https://github.com/poojakira) — Master's in Information Technology, Arizona State University.
 
 > **Note:** All telemetry data is simulated. This is a portfolio demonstration project, not connected to real satellites.
